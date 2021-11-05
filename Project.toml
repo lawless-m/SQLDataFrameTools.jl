@@ -1,0 +1,20 @@
+name = "SQLDataFrameTools"
+uuid = "fda230f0-5871-413e-9850-4812b05d76c2"
+authors = ["Matthew Heath <Matthew.Heath@wrenkitchens.com> and contributors"]
+version = "0.1.0"
+
+[deps]
+DBInterface = "a10d1c49-ce27-4219-8d33-6db1a4562965"
+DataFrameTools = "ff0d0012-cacc-467c-a675-b36108f55689"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+SHA = "ea8e919c-243c-51af-8825-aaa63cd721ce"
+
+[compat]
+julia = "1.6"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]

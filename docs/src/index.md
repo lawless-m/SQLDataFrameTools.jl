@@ -21,3 +21,7 @@ select_fn
 ```@docs
 fetch_and_combine
 ```
+
+```@docs
+Dfetch_and_combine
+```

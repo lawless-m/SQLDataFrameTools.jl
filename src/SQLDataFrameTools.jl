@@ -5,8 +5,9 @@ using SHA
 using DBInterface
 using Dates
 using DataFrames
+using Distributed
 
-export QueryCache, df_cached, select_fn, expired, fetch_and_combine
+export QueryCache, df_cached, select_fn, expired, fetch_and_combine, Dfetch_and_combine
 
 """
     QueryCache(sql, select, dir, format;  subformat=nothing, dictencode=true)
@@ -143,6 +144,13 @@ df = fetch_and_combine([
 
 """
 fetch_and_combine(queries; ttl=Day(7), noisy=false) = reduce((adf, query)->append!(adf, df_cached(query, ttl, noisy=noisy)), queries, init=DataFrame())
+
+"""
+	Dfetch_and_combine(queries; ttl:Union{Dates.Period, Dates.DateTime}, noisy::Bool)
+	
+The same as fetch\\_and\\_combine but use a different process for each Query, spawning at :any.
+"""
+Dfetch_and_combine(queries; ttl=Day(7), noisy=false) = reduce((adf, query)->append!(adf, fetch(future)), [@spawnat :any df_cached(query, ttl, noisy=noisy)], init=DataFrame())
 
 ###
 end

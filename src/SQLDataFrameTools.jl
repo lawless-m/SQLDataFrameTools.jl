@@ -60,8 +60,8 @@ expired(q::QueryCache, ttl::Period) = expired(q, unix2datetime(mtime(q.cachepath
 	
 	
 # Arguments
-`q` a QueryCache
-`ttl_e` is either a DataTime or Period specifying how long the cache should be live.
+- `q` a QueryCache
+- `ttl_e` is either a DataTime or Period specifying how long the cache should be live.
 
 If the cached version of the DataFrame is still live, return it from disk.
 
@@ -73,15 +73,18 @@ The noisy flag indicates whether to print to stderr where the data is coming fro
 # Examples
 
 Always retreive the SQL from the server
+
 `df = df_cached(query, now())` 
 
 Get the cached version, if it exists, or is less than 7 days old
+
 Print "From Server" or "From Cache" on stderr, depending where it came from.
+
 `df = df_cached(query, Dates.Day(7), noisy=true)` 
 
 """
 function df_cached(q::QueryCache, ttl_e; noisy=false)
-	if expired(q.cachepath, ttl_e)
+	if expired(q, ttl_e)
 		if noisy
 			println(stderr, "From Server")
 		end
@@ -111,7 +114,7 @@ Return a function which will `execute` the Query's sql on the supplied connectio
 `sql_fn = select_fn(MySQL.Connection, SERVER, USER, PASSWORD)`
 
 """
-select_fn(connection, args...; kw...) = sql->DBInterface.execute(DBInterface.connect(conn, args...; kw...), sql) |> DataFrame 
+select_fn(connection, args...; kw...) = sql->DBInterface.execute(DBInterface.connect(connection, args...; kw...), sql) |> DataFrame 
 
 ###
 end

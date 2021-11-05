@@ -18,3 +18,6 @@ df_cached
 select_fn
 ```
 
+```@docs
+fetch_and_combine
+```

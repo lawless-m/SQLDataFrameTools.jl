@@ -45,7 +45,7 @@ Has the cache file expired. If the file doesn't exist always return true, otherw
 
 """
 expired(q::QueryCache, expires::DateTime) = expires <= now() || stat(q.cachepath).device == 0
-expired(q::QueryCache, ttl::Period) = expired(q.cachepath, unix2datetime(mtime(q.cachepath)) + ttl)
+expired(q::QueryCache, ttl::Period) = expired(q, unix2datetime(mtime(q.cachepath)) + ttl)
 	
 """	
 df_cached[q, ttl_e; noisy=false)

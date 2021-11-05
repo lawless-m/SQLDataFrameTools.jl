@@ -38,8 +38,8 @@ end
 cachepath(dir, hash, sformat) = joinpath(dir, hash * '.' * string(sformat))
 
 """
-    expired(q::QueryCache, expires::DateTime)
-    expired(q::QueryCache, ttl::Period)
+    expired(q::QueryCache, expires::Dates.DateTime)
+    expired(q::QueryCache, ttl::Dates.Period)
 
 Has the cache file expired?
 If the file doesn't exist always return true, otherwise check the mtime against the given time.

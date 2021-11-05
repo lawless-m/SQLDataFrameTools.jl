@@ -78,7 +78,7 @@ Always retreive the SQL from the server
 
 Get the cached version, if it exists, or is less than 7 days old
 
-Print "From Server" or "From Cache" on stderr, depending where it came from.
+Print "From Server" or "From Cache" on stderr, depending where it came from, with the filename / sql snippet
 
 `df = df_cached(query, Dates.Day(7), noisy=true)` 
 
@@ -93,7 +93,7 @@ function df_cached(q::QueryCache, ttl_e; noisy=false)
 		return df
 	else
 		if noisy
-			println(stderr, "From Cache - ", q.cachepath)
+			println(stderr, "From Cache - ", splitpath(q.cachepath)[end])
 		end
 		df_read(q.cachepath)
 	end

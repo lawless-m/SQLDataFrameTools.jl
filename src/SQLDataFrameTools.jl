@@ -150,7 +150,7 @@ fetch_and_combine(queries; ttl=Day(7), noisy=false) = reduce((adf, query)->appen
 	
 The same as fetch\\_and\\_combine but use a different process for each Query, spawning at :any.
 """
-Dfetch_and_combine(queries; ttl=Day(7), noisy=false) = reduce((adf, query)->append!(adf, fetch(future)), [@spawnat :any df_cached(query, ttl, noisy=noisy) for query in queries], init=DataFrame())
+Dfetch_and_combine(queries; ttl=Day(7), noisy=false) = reduce((adf, future)->append!(adf, fetch(future)), [@spawnat :any df_cached(query, ttl, noisy=noisy) for query in queries], init=DataFrame())
 
 ###
 end

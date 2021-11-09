@@ -25,3 +25,7 @@ fetch_and_combine
 ```@docs
 Dfetch_and_combine
 ```
+
+```@docs
+Tfetch_and_combine
+```

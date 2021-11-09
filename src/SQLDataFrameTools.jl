@@ -7,7 +7,7 @@ using Dates
 using DataFrames
 using Distributed
 
-export QueryCache, df_cached, select_fn, expired, fetch_and_combine, Dfetch_and_combine
+export QueryCache, df_cached, select_fn, expired, fetch_and_combine, Dfetch_and_combine, Tfetch_and_combine
 
 """
     QueryCache(sql, select, dir, format;  subformat=nothing, dictencode=true)
@@ -87,14 +87,14 @@ Print "From Server" or "From Cache" on stderr, depending where it came from, wit
 function df_cached(q::QueryCache, ttl_e; noisy=false)
 	if expired(q, ttl_e)
 		if noisy
-			println(stderr, "From Server - ", q.sql[1:(length(q.sql) < 20 ? end : 20)])
+			println(stderr, "($(Threads.threadid())) From Server - ", q.sql[1:(length(q.sql) < 40 ? end : 40)])
 		end
 		df = q.select(q.sql)
 		df_write(q.cachepath, df, subformat=q.subformat, dictencode=q.dictencode)
 		return df
 	else
 		if noisy
-			println(stderr, "From Cache - ", splitpath(q.cachepath)[end])
+			println(stderr, "($(Threads.threadid())) From Cache - ", splitpath(q.cachepath)[end])
 		end
 		df_read(q.cachepath)
 	end
@@ -143,7 +143,14 @@ df = fetch_and_combine([
 ```
 
 """
-fetch_and_combine(queries; ttl=Day(7), noisy=false) = reduce((adf, query)->append!(adf, df_cached(query, ttl, noisy=noisy)), queries, init=DataFrame())
+function fetch_and_combine(queries; ttl=Day(7), noisy=false)
+	dfs = Vector{DataFrame}(undef, length(queries))
+	Threads.@threads for i in 1:length(queries)
+		dfs[i] = df_cached(queries[i], ttl, noisy=noisy)
+	end
+	reduce((adf, df)->append!(adf, df), dfs[2:end], init=dfs[1])
+end
+#fetch_and_combine(queries; ttl=Day(7), noisy=false) = reduce((adf, query)->append!(adf, df_cached(query, ttl, noisy=noisy)), queries, init=DataFrame())
 
 """
 	Dfetch_and_combine(queries; ttl:Union{Dates.Period, Dates.DateTime}, noisy::Bool)
@@ -151,7 +158,6 @@ fetch_and_combine(queries; ttl=Day(7), noisy=false) = reduce((adf, query)->appen
 The same as fetch\\_and\\_combine but use a different process for each Query, spawning at :any.
 """
 Dfetch_and_combine(queries; ttl=Day(7), noisy=false) = reduce((adf, future)->append!(adf, fetch(future)), [@spawnat :any df_cached(query, ttl, noisy=noisy) for query in queries], init=DataFrame())
-
 ###
 end
 

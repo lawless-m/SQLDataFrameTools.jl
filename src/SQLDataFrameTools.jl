@@ -43,6 +43,7 @@ cachepath(dir, hash, sformat) = joinpath(dir, hash * '.' * string(sformat))
     expired(q::QueryCache, ttl::Dates.Period)
 
 Has the cache file expired?
+
 If the file doesn't exist always return true, otherwise check the mtime against the given time.
 
 # Arguments
@@ -137,9 +138,10 @@ Given an iterable collection of queries, fetch them and combine them into a sing
 # Example
 
 If we have a long_view that times out on a single connection then split it into 3 and re-combine them.
-This is my actual use case for this Module. I'm querying from MySQL on AWS and only get 300 seconds. 
-If the network is busy, my queries risk being terminated, so I break them into chunks.
 
+This is my actual use case for this Module. I'm querying from MySQL on AWS and only get 300 seconds. 
+
+If the network is busy, my queries risk being terminated, so I break them into chunks.
 
 	df = fetch_and_combine([
 		QueryCache("SELECT long_view WHERE created BETWEEN '2019-01-01' AND '2019-12-13'", sql_fn, ".", :arrow),

@@ -7,11 +7,11 @@ QueryCache
 ```
 
 ```@docs
-expired
+df_cached
 ```
 
 ```@docs
-df_cached
+expired
 ```
 
 ```@docs
@@ -24,8 +24,4 @@ fetch_and_combine
 
 ```@docs
 Dfetch_and_combine
-```
-
-```@docs
-Tfetch_and_combine
 ```

@@ -7,7 +7,7 @@ using Dates
 using DataFrames
 using Distributed
 
-export QueryCache, df_cached, select_fn, expired, fetch_and_combine, Dfetch_and_combine, Tfetch_and_combine
+export QueryCache, df_cached, select_fn, expired, fetch_and_combine, Dfetch_and_combine
 
 """
     QueryCache(sql, select, dir, format;  subformat=nothing, dictencode=true)
@@ -24,7 +24,7 @@ is the Data Structure used in this module.
 
 # Examples
 
-`query = QueryCache("SELECT 1",  select_fn(MySQL.Connection, SERVER, USER, PASSWORD), ".", :jdf)`
+	query = QueryCache("SELECT 1",  select_fn(MySQL.Connection, SERVER, USER, PASSWORD), ".", :jdf)
 
 """
 struct QueryCache
@@ -45,11 +45,17 @@ cachepath(dir, hash, sformat) = joinpath(dir, hash * '.' * string(sformat))
 Has the cache file expired?
 If the file doesn't exist always return true, otherwise check the mtime against the given time.
 
+# Arguments
+
+- `q` a QueryCache struct
+- `expires` a DateTime to check against the current time.
+- `ttl` a time period to compare the current time to the mtime of the cache + ttl 
+
 # Examples
 
-`expired(query, Dates.Day(3))` # returns a bool of whether the cache is more than 3 days old 
-`expired(query, Dates.Minute(30))` # returns a bool of whether the cache is more than 30 minutes old 
-`expired(query, Dates.DateTime(2021, 1, 1, 1, 2, 3))` # returns a bool compared to the given time
+	expired(query, Dates.Day(3)) # returns a bool of whether the cache is more than 3 days old 
+	expired(query, Dates.Minute(30)) # returns a bool of whether the cache is more than 30 minutes old 
+	expired(query, Dates.DateTime(2021, 1, 1, 1, 2, 3)) # returns a bool compared to the given time
 
 """
 expired(q::QueryCache, expires::DateTime) = expires <= now() || stat(q.cachepath).device == 0
@@ -75,13 +81,13 @@ The noisy flag indicates whether to print to stderr where the data is coming fro
 
 Always retreive the SQL from the server
 
-`df = df_cached(query, now())` 
+	df = df_cached(query, now())
 
 Get the cached version, if it exists, or is less than 7 days old
 
 Print "From Server" or "From Cache" on stderr, depending where it came from, with the filename / sql snippet
 
-`df = df_cached(query, Dates.Day(7), noisy=true)` 
+	df = df_cached(query, Dates.Day(7), noisy=true)
 
 """
 function df_cached(q::QueryCache, ttl_e; noisy=false)
@@ -112,7 +118,7 @@ Return a function which will `execute` the Query's sql on the supplied connectio
 
 # Examples
 
-`sql_fn = select_fn(MySQL.Connection, SERVER, USER, PASSWORD)`
+	sql_fn = select_fn(MySQL.Connection, SERVER, USER, PASSWORD)
 
 """
 select_fn(connection, args...; kw...) = sql->DBInterface.execute(DBInterface.connect(connection, args...; kw...), sql) |> DataFrame 
@@ -120,7 +126,7 @@ select_fn(connection, args...; kw...) = sql->DBInterface.execute(DBInterface.con
 """
 	fetch_and_combine(queries; ttl:Union{Dates.Period, Dates.DateTime}, noisy::Bool)
 	
-Given an iterable collection of queries, fetch them and combine them into a single DataFrame
+Given an iterable collection of queries, fetch them and combine them into a single DataFrame using as many threads as available.
 
 # Arguments
 
@@ -134,14 +140,12 @@ If we have a long_view that times out on a single connection then split it into 
 This is my actual use case for this Module. I'm querying from MySQL on AWS and only get 300 seconds. 
 If the network is busy, my queries risk being terminated, so I break them into chunks.
 
-```
-df = fetch_and_combine([
-	QueryCache("SELECT long_view WHERE created BETWEEN '2019-01-01' AND '2019-12-13'", sql_fn, ".", :arrow),
-	QueryCache("SELECT long_view WHERE created BETWEEN '2020-01-01' AND '2020-12-13'", sql_fn, ".", :arrow),
-	QueryCache("SELECT long_view WHERE created BETWEEN '2021-01-01' AND '2021-12-13'", sql_fn, ".", :arrow),
-	])
-```
 
+	df = fetch_and_combine([
+		QueryCache("SELECT long_view WHERE created BETWEEN '2019-01-01' AND '2019-12-13'", sql_fn, ".", :arrow),
+		QueryCache("SELECT long_view WHERE created BETWEEN '2020-01-01' AND '2020-12-13'", sql_fn, ".", :arrow),
+		QueryCache("SELECT long_view WHERE created BETWEEN '2021-01-01' AND '2021-12-13'", sql_fn, ".", :arrow),
+		])
 """
 function fetch_and_combine(queries; ttl=Day(7), noisy=false)
 	dfs = Vector{DataFrame}(undef, length(queries))
@@ -155,7 +159,7 @@ end
 """
 	Dfetch_and_combine(queries; ttl:Union{Dates.Period, Dates.DateTime}, noisy::Bool)
 	
-The same as fetch\\_and\\_combine but use a different process for each Query, spawning at :any.
+The same as [fetch\\_and\\_combine][@ref] but use a different process for each Query, spawning at :any.
 """
 Dfetch_and_combine(queries; ttl=Day(7), noisy=false) = reduce((adf, future)->append!(adf, fetch(future)), [@spawnat :any df_cached(query, ttl, noisy=noisy) for query in queries], init=DataFrame())
 ###

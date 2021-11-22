@@ -6,3 +6,4 @@ Wrapper around DataFrameTools to cache SQL result sets, with expiration
 
 [Documentation](https://lawless-m.github.io/SQLDataFrameTools.jl/dev/)
 
+registering

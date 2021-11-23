@@ -13,6 +13,9 @@ SHA = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 
 [compat]
 julia = "1.6"
+DBInterface = "2.4.1"
+DataFrameTools = "1.0.7"
+DataFrames = "1.2.0"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

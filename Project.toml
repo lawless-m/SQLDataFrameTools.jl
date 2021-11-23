@@ -1,7 +1,7 @@
 name = "SQLDataFrameTools"
 uuid = "fda230f0-5871-413e-9850-4812b05d76c2"
 authors = ["Matthew Heath <Matthew.Heath@wrenkitchens.com> and contributors"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 DBInterface = "a10d1c49-ce27-4219-8d33-6db1a4562965"

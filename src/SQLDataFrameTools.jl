@@ -91,7 +91,7 @@ Print "From Server" or "From Cache" on stderr, depending where it came from, wit
 	df = df_cached(query, Dates.Day(7), noisy=true)
 
 """
-function df_cached(q::QueryCache, ttl_e; noisy=false)
+function df_cached(q::QueryCache, ttl_e; noisy=false, attempts=0)
 	if expired(q, ttl_e)
 		if noisy
 			println(stderr, "($(Threads.threadid())) From Server - ", q.sql[1:(length(q.sql) < 40 ? end : 40)])

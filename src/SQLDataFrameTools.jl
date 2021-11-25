@@ -103,7 +103,18 @@ function df_cached(q::QueryCache, ttl_e; noisy=false)
 		if noisy
 			println(stderr, "($(Threads.threadid())) From Cache - ", splitpath(q.cachepath)[end])
 		end
-		df_read(q.cachepath)
+		try 
+			df_read(q.cachepath)
+		catch e
+			if attempts > 1
+				throw("df_cached failed $attempts times")
+				return nothing # probably not needed
+			end
+			
+			if isa(e, SystemError)
+				return df_cached(q, now(), noisy=noisy, attempts=attempts+1)
+			end
+		end
 	end
 end
 

@@ -93,8 +93,11 @@ Print "From Server" or "From Cache" on stderr, depending where it came from, wit
 """
 function df_cached(q::QueryCache, ttl_e; noisy=false, attempts=0)
 	if expired(q, ttl_e)
-		if noisy
+		if isa(noisy, Bool) && noisy
 			println(stderr, "($(Threads.threadid())) From Server - ", q.sql[1:(length(q.sql) < 40 ? end : 40)])
+		end
+		if isa(noisy, Int) && noisy > 0
+			println(stderr, "($(Threads.threadid())) From Server - ", q.sql)
 		end
 		df = q.select(q.sql)
 		df_write(q.cachepath, df, subformat=q.subformat, dictencode=q.dictencode)
